@@ -31,7 +31,7 @@ export default function LoginPage() {
       const parsedUser = username.trim().toLowerCase();
 
       if (parsedUser === 'parent' || parsedUser === 'sarah') {
-        router.push('/dashboard');
+        router.push('/parent');
       } else if (parsedUser === 'teacher' || parsedUser === 'jenkins') {
         router.push('/teacher');
       } else if (parsedUser === 'principal') {
