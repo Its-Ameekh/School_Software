@@ -74,7 +74,7 @@ export default function LoginPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-[#005fb0] mb-4 text-2xl font-bold">
               📖
             </div>
-            <h1 className="text-2xl font-bold text-[#005fb0] mb-1">Starlight Academy</h1>
+            <h1 className="text-2xl font-bold text-[#005fb0] mb-1">Iris World School</h1>
             <p className="text-xs text-gray-400">Welcome back to our learning family</p>
           </header>
 
@@ -162,7 +162,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-4 text-center opacity-40 text-[10px] font-semibold text-gray-400">
-          © 2026 Starlight Academy Educational Systems
+          © 2026 Iris World School Educational Systems
         </div>
       </main>
 

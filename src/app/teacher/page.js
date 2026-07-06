@@ -426,7 +426,7 @@ function TerminalProgressCardWidget({ studentName, admNo, className, remarks }) 
   return (
     <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-sm space-y-6 text-xs max-w-2xl mx-auto print:border-0 print:shadow-none">
       <div className="text-center border-b pb-4">
-        <h2 className="text-lg font-black tracking-wide text-gray-800">STARLIGHT ACADEMY</h2>
+        <h2 className="text-lg font-black tracking-wide text-gray-800">IRIS WORLD SCHOOL</h2>
         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Official Student Terminal Progress Report</p>
       </div>
       <div className="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-100 text-[11px]">
@@ -839,7 +839,7 @@ export default function TeacherDashboard() {
         <div className="flex justify-between items-center w-full px-6 md:px-10 h-20 max-w-[1280px] mx-auto">
           <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigateToView('dashboard')}>
             <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#4f9dff] text-white font-bold text-xl">★</div>
-            <h1 className="text-xl font-bold text-[#005fb0]">Starlight Academy</h1>
+            <h1 className="text-xl font-bold text-[#005fb0]">Iris World School</h1>
           </div>
           <div className="flex items-center gap-6">
             <nav className="hidden lg:flex gap-4 text-sm font-semibold text-gray-500">
@@ -1040,7 +1040,7 @@ export default function TeacherDashboard() {
 
       <footer className="bg-white border-t border-gray-100 py-6 px-10 text-xs font-bold text-gray-400 mt-12">
         <div className="max-w-[1280px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-[#005fb0] font-black">★ Starlight Academic ERP Ecosystem</p>
+          <p className="text-[#005fb0] font-black">★ Iris World Academic ERP Ecosystem</p>
           <p>Session State: Client Simulated Production Frame Active (2026)</p>
         </div>
       </footer>
