@@ -121,7 +121,7 @@ export default function ParentDashboard() {
         <div className="flex justify-between items-center w-full px-6 md:px-10 h-20 max-w-[1280px] mx-auto relative">
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-[#005fb0]"><span className="text-xl font-bold">★</span></div>
-            <h1 className="text-xl font-bold tracking-tight text-[#005fb0]">Starlight Academy</h1>
+            <h1 className="text-xl font-bold tracking-tight text-[#005fb0]">Iris World School</h1>
           </div>
           
           <div className="hidden md:flex items-center gap-8">
