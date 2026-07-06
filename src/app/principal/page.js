@@ -34,14 +34,96 @@ export default function PrincipalDashboard() {
     }
   }, [toastMessage]);
 
-  // Available Faculty Lead Teachers
-  const availableTeachers = [
+  // Available Lead Teachers Pool
+  const [availableTeachers, setAvailableTeachers] = useState([
     "Ms. Sarah J.",
     "Mr. David (Gym)",
     "Mrs. Jenkins",
     "Mr. Henderson",
     "Ms. Watson"
-  ];
+  ]);
+
+  // --- MOCK ANNOUNCEMENTS & EVENTS (Mandate 1) ---
+  const [announcements, setAnnouncements] = useState([
+    { id: 1, text: "Dusshera Break starting Friday", category: "Holiday" },
+    { id: 2, text: "Annual Health Checkup Week", category: "Health" }
+  ]);
+
+  const [events, setEvents] = useState([
+    { id: 1, title: "Parent Teacher Meet", day: "25", month: "Oct", time: "09:00 AM - 12:00 PM" },
+    { id: 2, title: "Halloween Parade", day: "28", month: "Oct", time: "03:30 PM Onwards" }
+  ]);
+
+  // Modal Visibility States
+  const [showAnnounceModal, setShowAnnounceModal] = useState(false);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [showWaiveModal, setShowWaiveModal] = useState(false);
+  const [showAddClassModal, setShowAddClassModal] = useState(false);
+  const [showProgressCardModal, setShowProgressCardModal] = useState(false);
+
+  // Quick Actions Overlay modals visibility
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [showAddTeacherModal, setShowAddTeacherModal] = useState(false);
+  const [showSendAlertModal, setShowSendAlertModal] = useState(false);
+  const [showDailyReportModal, setShowDailyReportModal] = useState(false);
+  
+  // Daily Report Loading / Mask State
+  const [dailyReportLoading, setDailyReportLoading] = useState(false);
+  const [dailyReportLoadText, setDailyReportLoadText] = useState('');
+
+  // Form States (Admissions & CRUD)
+  const [newAnnounceText, setNewAnnounceText] = useState('');
+  const [newAnnounceCat, setNewAnnounceCat] = useState('General');
+  const [newEventTitle, setNewEventTitle] = useState('');
+  const [newEventDay, setNewEventDay] = useState('');
+  const [newEventMonth, setNewEventMonth] = useState('Oct');
+  const [newEventTime, setNewEventTime] = useState('');
+
+  // Add Student Admission form state variables (Mandate 1)
+  const [admissionForm, setAdmissionForm] = useState({
+    fullName: '', dob: '', gender: 'Male', bloodGroup: 'O+', allergies: 'None', specialTalents: '',
+    fatherName: '', fatherOcc: '', motherName: '', motherOcc: '', email: '', mobile: '',
+    languagesSpoken: '', foodType: 'Vegetarian', transportPref: 'School Van',
+    payMode: 'Cash', amountPaid: '', receiptNum: ''
+  });
+
+  // Unassigned Students Pipeline state (Mandate 1 & 2)
+  const [unassignedStudents, setUnassignedStudents] = useState([]);
+
+  // Add Teacher Form states (Mandate 3)
+  const [newTeacherName, setNewTeacherName] = useState('');
+  const [newTeacherPhone, setNewTeacherPhone] = useState('');
+  const [newTeacherSpec, setNewTeacherSpec] = useState('');
+
+  // Alert Sender Message State (Mandate 3)
+  const [alertMessageContent, setAlertMessageContent] = useState('');
+
+  // Broadcast Wizard States
+  const [broadcastType, setBroadcastType] = useState('TUITION');
+  const [broadcastSMS, setBroadcastSMS] = useState(true);
+  const [broadcastEmail, setBroadcastEmail] = useState(true);
+  const [broadcastDays, setBroadcastDays] = useState('4');
+  const [broadcastLoading, setBroadcastLoading] = useState(false);
+
+  // Exemption State
+  const [waiveTargetRoll, setWaiveTargetRoll] = useState('');
+  const [waiveReason, setWaiveReason] = useState('');
+
+  // Class Management Add Class Form States
+  const [newClassName, setNewClassName] = useState('');
+  const [newClassTeacher, setNewClassTeacher] = useState('Ms. Sarah J.');
+
+  // Student Add Form States
+  const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentAge, setNewStudentAge] = useState('');
+
+  // Student Progress Card overlay target
+  const [selectedStudentGrades, setSelectedStudentGrades] = useState(null);
+
+  // Timetable Edit Mode states
+  const [editingSlot, setEditingSlot] = useState(null); // { day, idx }
+  const [editingSlotVal, setEditingSlotVal] = useState('');
 
   // --- STUDENT LEDGER DATABASE STATE (Finance) ---
   const [studentsList, setStudentsList] = useState([
@@ -139,60 +221,9 @@ export default function PrincipalDashboard() {
     }
   ]);
 
-  // Modal Visibility States
-  const [showAnnounceModal, setShowAnnounceModal] = useState(false);
-  const [showEventModal, setShowEventModal] = useState(false);
-  const [showBroadcastModal, setShowBroadcastModal] = useState(false);
-  const [showWaiveModal, setShowWaiveModal] = useState(false);
-  const [showAddClassModal, setShowAddClassModal] = useState(false);
-  const [showProgressCardModal, setShowProgressCardModal] = useState(false);
-
-  // Form States (Announcements & Events)
-  const [announcements, setAnnouncements] = useState([
-    { id: 1, text: "Dusshera Break starting Friday", category: "Holiday" },
-    { id: 2, text: "Annual Health Checkup Week", category: "Health" }
-  ]);
-  const [events, setEvents] = useState([
-    { id: 1, title: "Parent Teacher Meet", day: "25", month: "Oct", time: "09:00 AM - 12:00 PM" },
-    { id: 2, title: "Halloween Parade", day: "28", month: "Oct", time: "03:30 PM Onwards" }
-  ]);
-  const [newAnnounceText, setNewAnnounceText] = useState('');
-  const [newAnnounceCat, setNewAnnounceCat] = useState('General');
-  const [newEventTitle, setNewEventTitle] = useState('');
-  const [newEventDay, setNewEventDay] = useState('');
-  const [newEventMonth, setNewEventMonth] = useState('Oct');
-  const [newEventTime, setNewEventTime] = useState('');
-
-  // Broadcast Wizard States
-  const [broadcastType, setBroadcastType] = useState('TUITION');
-  const [broadcastSMS, setBroadcastSMS] = useState(true);
-  const [broadcastEmail, setBroadcastEmail] = useState(true);
-  const [broadcastDays, setBroadcastDays] = useState('4');
-  const [broadcastLoading, setBroadcastLoading] = useState(false);
-
-  // Exemption State
-  const [waiveTargetRoll, setWaiveTargetRoll] = useState('');
-  const [waiveReason, setWaiveReason] = useState('');
-
-  // Class Management Add Class Form States
-  const [newClassName, setNewClassName] = useState('');
-  const [newClassTeacher, setNewClassTeacher] = useState('Ms. Sarah J.');
-
-  // Student Add Form States
-  const [newStudentName, setNewStudentName] = useState('');
-  const [newStudentAge, setNewStudentAge] = useState('');
-
-  // Student Progress Card overlay target
-  const [selectedStudentGrades, setSelectedStudentGrades] = useState(null);
-
-  // Timetable Edit Mode states
-  const [editingSlot, setEditingSlot] = useState(null); // { day, idx }
-  const [editingSlotVal, setEditingSlotVal] = useState('');
-
-  // Active Selected Class Object
   const currentClassObj = classesList.find(c => c.id === selectedClassId) || classesList[0];
 
-  // --- CRUD ACTIONS (Announcements & Events) ---
+  // --- CRUD HANDLERS (Announcements & Events) ---
   const handleDeleteAnnouncement = (id) => {
     setAnnouncements(announcements.filter(item => item.id !== id));
   };
@@ -297,7 +328,7 @@ export default function PrincipalDashboard() {
   };
   const methodBreakdown = getMethodBreakdown();
 
-  // --- CLASS MANAGEMENT HANDLERS (Mandate) ---
+  // --- CLASS MANAGEMENT CONTROLLERS ---
   const handleTeacherAssignChange = (classId, teacherName) => {
     setClassesList(prev => prev.map(c => {
       if (c.id === classId) {
@@ -312,8 +343,6 @@ export default function PrincipalDashboard() {
     e.preventDefault();
     if (!newClassName.trim()) return;
     const newId = newClassName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    
-    // Setup basic template
     const newRoom = {
       id: newId,
       name: newClassName,
@@ -331,7 +360,6 @@ export default function PrincipalDashboard() {
         { date: "Oct 20", count: "0/0" }
       ]
     };
-
     setClassesList([...classesList, newRoom]);
     setNewClassName('');
     setNewClassTeacher('Ms. Sarah J.');
@@ -342,10 +370,8 @@ export default function PrincipalDashboard() {
   const handleAddStudentToClass = (e) => {
     e.preventDefault();
     if (!newStudentName.trim() || !newStudentAge.trim()) return;
-    
     const ageVal = parseInt(newStudentAge);
     const newRoll = `STU-${Math.floor(100 + Math.random() * 900)}`;
-
     const newStudentObj = {
       name: newStudentName,
       roll: newRoll,
@@ -353,14 +379,12 @@ export default function PrincipalDashboard() {
       statusToday: "Present",
       grades: { Art: "A", Behavior: "Excellent", Language: "Good", Math: "A-" }
     };
-
     setClassesList(prev => prev.map(c => {
       if (c.id === selectedClassId) {
         return { ...c, students: [...c.students, newStudentObj] };
       }
       return c;
     }));
-
     setNewStudentName('');
     setNewStudentAge('');
     setToastMessage(`Enrolled student ${newStudentName} into ${currentClassObj.name}.`);
@@ -395,22 +419,14 @@ export default function PrincipalDashboard() {
   const handleSaveTimetableSlot = () => {
     if (!editingSlot) return;
     const { day, idx } = editingSlot;
-    
     setClassesList(prev => prev.map(c => {
       if (c.id === selectedClassId) {
-        const updatedDaySchedule = [...c.timetable[day]];
-        updatedDaySchedule[idx] = editingSlotVal;
-        return {
-          ...c,
-          timetable: {
-            ...c.timetable,
-            [day]: updatedDaySchedule
-          }
-        };
+        const updated = [...c.timetable[day]];
+        updated[idx] = editingSlotVal;
+        return { ...c, timetable: { ...c.timetable, [day]: updated } };
       }
       return c;
     }));
-
     setEditingSlot(null);
     setToastMessage("Schedule slot updated successfully.");
   };
@@ -418,10 +434,7 @@ export default function PrincipalDashboard() {
   const handleAttendanceChange = (roll, nextStatus) => {
     setClassesList(prev => prev.map(c => {
       if (c.id === selectedClassId) {
-        return {
-          ...c,
-          students: c.students.map(s => s.roll === roll ? { ...s, statusToday: nextStatus } : s)
-        };
+        return { ...c, students: c.students.map(s => s.roll === roll ? { ...s, statusToday: nextStatus } : s) };
       }
       return c;
     }));
@@ -433,27 +446,175 @@ export default function PrincipalDashboard() {
     setShowProgressCardModal(true);
   };
 
+  // --- MANDATE 1: +ADD STUDENT ENROLLMENT ADMISSIONS ---
+  const handleAdmissionSubmit = (e) => {
+    e.preventDefault();
+    const newRoll = `STU-ADM-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const newAdmittedStudent = {
+      name: admissionForm.fullName,
+      roll: newRoll,
+      dob: admissionForm.dob,
+      gender: admissionForm.gender,
+      bloodGroup: admissionForm.bloodGroup,
+      allergies: admissionForm.allergies,
+      specialTalents: admissionForm.specialTalents,
+      fatherName: admissionForm.fatherName,
+      fatherOcc: admissionForm.fatherOcc,
+      motherName: admissionForm.motherName,
+      motherOcc: admissionForm.motherOcc,
+      email: admissionForm.email,
+      mobile: admissionForm.mobile,
+      languagesSpoken: admissionForm.languagesSpoken,
+      foodType: admissionForm.foodType,
+      transportPref: admissionForm.transportPref,
+      payMode: admissionForm.payMode,
+      amountPaid: admissionForm.amountPaid,
+      receiptNum: admissionForm.receiptNum,
+      classAssignment: "UNASSIGNED"
+    };
+
+    setUnassignedStudents([...unassignedStudents, newAdmittedStudent]);
+    setShowAddStudentModal(false);
+    setToastMessage(`Admissions Registered: ${admissionForm.fullName} placed in pipeline.`);
+    
+    // Reset form
+    setAdmissionForm({
+      fullName: '', dob: '', gender: 'Male', bloodGroup: 'O+', allergies: 'None', specialTalents: '',
+      fatherName: '', fatherOcc: '', motherName: '', motherOcc: '', email: '', mobile: '',
+      languagesSpoken: '', foodType: 'Vegetarian', transportPref: 'School Van',
+      payMode: 'Cash', amountPaid: '', receiptNum: ''
+    });
+  };
+
+  // --- MANDATE 2: PIPELINE UNASSIGNED ALLOCATION ---
+  const handleAssignPipelineStudent = (roll, classId) => {
+    const student = unassignedStudents.find(s => s.roll === roll);
+    const targetClass = classesList.find(c => c.id === classId);
+
+    if (!student || !targetClass) return;
+
+    // 1. Add to Class Students array
+    const classStudentObj = {
+      name: student.name,
+      roll: student.roll,
+      age: 4, // Default placement age
+      statusToday: "Present",
+      grades: { Art: "A", Behavior: "Excellent", Language: "Good", Math: "A-" }
+    };
+
+    setClassesList(prev => prev.map(c => {
+      if (c.id === classId) {
+        return { ...c, students: [...c.students, classStudentObj] };
+      }
+      return c;
+    }));
+
+    // 2. Add to Tuition Finance Ledger
+    const tuitionAmt = classId === 'little-sprouts' ? 1200 : classId === 'kindergarten' ? 1500 : 1800;
+    const isBus = student.transportPref === 'School Van';
+
+    const financeStudentObj = {
+      name: student.name,
+      roll: student.roll,
+      class: targetClass.name,
+      tuitionDue: tuitionAmt,
+      tuitionStatus: "Pending",
+      paymentMethod: "online",
+      usesTransport: isBus,
+      transportDue: isBus ? 150 : 0,
+      transportStatus: isBus ? "Pending" : "Paid"
+    };
+
+    setStudentsList([...studentsList, financeStudentObj]);
+
+    // 3. Remove from Pipeline
+    setUnassignedStudents(unassignedStudents.filter(s => s.roll !== roll));
+    setToastMessage(`Assigned student ${student.name} to ${targetClass.name} roster.`);
+  };
+
+  // --- MANDATE 3: +ADD TEACHER ---
+  const handleAddTeacherSubmit = (e) => {
+    e.preventDefault();
+    if (!newTeacherName.trim()) return;
+    setAvailableTeachers([...availableTeachers, newTeacherName]);
+    setNewTeacherName('');
+    setNewTeacherPhone('');
+    setNewTeacherSpec('');
+    setShowAddTeacherModal(false);
+    setToastMessage(`Faculty Pool: Added ${newTeacherName} to lead choices.`);
+  };
+
+  // --- MANDATE 3: SEND EMERGENCY ALERT BROADCASTER ---
+  const handleSendAlertSubmit = (e) => {
+    e.preventDefault();
+    if (!alertMessageContent.trim()) return;
+
+    const newAlertObj = {
+      id: announcements.length > 0 ? Math.max(...announcements.map(a => a.id)) + 1 : 1,
+      text: alertMessageContent,
+      category: "⚠️ EMERGENCY URGENT"
+    };
+
+    setAnnouncements([newAlertObj, ...announcements]);
+    setAlertMessageContent('');
+    setShowSendAlertModal(false);
+    setToastMessage("Emergency alert broadcasted live to Announcements.");
+  };
+
+  // --- MANDATE 3: DAILY REPORT AUDIT LOADERS ---
+  const triggerDailyReportAuditor = () => {
+    setDailyReportLoading(true);
+    setDailyReportLoadText("Aggregating active attendance metrics...");
+
+    setTimeout(() => {
+      setDailyReportLoadText("Auditing tuition ledger transactions...");
+      setTimeout(() => {
+        setDailyReportLoading(false);
+        setShowDailyReportModal(true);
+      }, 1500);
+    }, 1500);
+  };
+
+  // Get category badge color styling classes
   const getAnnounceCategoryBadge = (category) => {
     switch (category) {
-      case 'Holiday': return 'bg-red-100 text-red-700 border-red-200';
-      case 'Health': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'Academic': return 'bg-green-100 text-green-700 border-green-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'Holiday':
+        return 'bg-red-100 text-red-700 border-red-200';
+      case 'Health':
+        return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'Academic':
+        return 'bg-green-100 text-green-700 border-green-200';
+      case '⚠️ EMERGENCY URGENT':
+        return 'bg-red-600 text-white border-red-700 font-extrabold';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
 
   return (
     <div className="bg-[#f9f9ff] text-[#111c2c] min-h-screen font-sans antialiased relative overflow-x-hidden pb-12">
       
-      {/* --- BACKGROUND DECORATIONS --- */}
+      {/* --- BACKGROUND ACCENTS --- */}
       <div className="fixed top-24 left-12 text-yellow-400/20 pointer-events-none select-none text-6xl font-bold animate-pulse">★</div>
       <div className="fixed bottom-24 right-12 text-blue-400/10 pointer-events-none select-none text-8xl font-bold">☁</div>
 
-      {/* --- TOAST NOTIFICATIONS --- */}
+      {/* --- FLOATING TOAST NOTIFICATION --- */}
       {toastMessage && (
         <div className="fixed top-6 right-6 z-[120] bg-emerald-600 text-white font-semibold text-xs px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-2 border border-emerald-500 animate-slideIn">
           <span>✓</span>
           <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* --- FULL SCREEN LOADING MASK (Mandate 3 - Daily Report) --- */}
+      {dailyReportLoading && (
+        <div className="fixed inset-0 z-[200] bg-[#111c2c]/90 backdrop-blur-md flex flex-col items-center justify-center space-y-6 text-white p-4">
+          <div className="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+          <div className="text-center space-y-2">
+            <h3 className="text-lg font-bold">Daily Executive Auditor</h3>
+            <p className="text-xs text-blue-200 animate-pulse font-medium">{dailyReportLoadText}</p>
+          </div>
         </div>
       )}
 
@@ -498,10 +659,10 @@ export default function PrincipalDashboard() {
         </div>
       </header>
 
-      {/* --- MAIN CORE CONTAINER --- */}
+      {/* --- MAIN CONTAINER --- */}
       <main className="max-w-[1280px] mx-auto px-4 md:px-10 py-8 space-y-8">
         
-        {/* Welcome Header Banner */}
+        {/* Welcome Banner */}
         <header className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-8 bg-blue-50/50 border border-blue-100 rounded-2xl overflow-hidden shadow-sm">
           <div className="z-10">
             <p className="text-xs font-bold text-[#005fb0] uppercase tracking-widest mb-1">Management Portal</p>
@@ -515,14 +676,16 @@ export default function PrincipalDashboard() {
           </div>
         </header>
 
-        {/* --- DYNAMIC VIEWPORT ROUTING --- */}
+        {/* --- VIEW MODE CONDITIONAL RENDER --- */}
+        
+        {/* VIEW 1: OPERATIONS */}
         {viewMode === 'OPERATIONS' && (
           <>
             {/* Quick Stats Bento Grid */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {renderStatCard("👶 Total Students", "124", "+12%", "8 new admissions this month")}
-              {renderStatCard("👨🏫 Teachers", "18", "Stable", "2 on leave today")}
-              {renderStatCard("🏫 Active Classes", "12", "Active", "3 sections per age group")}
+              {renderStatCard("👶 Total Students", `${124 + unassignedStudents.length}`, "+12%", "Admissions pipeline synced")}
+              {renderStatCard("👨🏫 Teachers", `${availableTeachers.length}`, "Stable", "Active Faculty Lead Pool")}
+              {renderStatCard("🏫 Active Classes", `${classesList.length}`, "Active", "3 sections per age group")}
               {renderStatCard("📊 Attendance Rate", "94%", "Optimal", "Above monthly average")}
               {renderStatCard("💰 Fees Collected", "82%", "Pending", "$12,400 outstanding")}
               {renderStatCard("🚌 Transport Fleet", "06", "Normal", "All routes on time")}
@@ -565,7 +728,7 @@ export default function PrincipalDashboard() {
                 ) : (
                   <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
                     {announcements.map(item => (
-                      <div key={item.id} className="p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs relative group flex flex-col items-start gap-1">
+                      <div key={item.id} className="p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs relative group flex flex-col items-start gap-1 animate-fadeIn">
                         <button onClick={() => handleDeleteAnnouncement(item.id)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500 font-bold text-sm transition">×</button>
                         <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${getAnnounceCategoryBadge(item.category)}`}>
                           {item.category}
@@ -590,7 +753,7 @@ export default function PrincipalDashboard() {
                 ) : (
                   <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
                     {events.map(item => (
-                      <div key={item.id} className="flex gap-4 p-3 bg-gray-50 border border-gray-100 rounded-xl transition relative group">
+                      <div key={item.id} className="flex gap-4 p-3 bg-gray-50 border border-gray-100 rounded-xl transition relative group animate-fadeIn">
                         <button onClick={() => handleDeleteEvent(item.id)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500 font-bold text-sm transition">×</button>
                         <div className="w-10 h-10 bg-blue-50 text-[#005fb0] border border-blue-100 rounded-xl flex flex-col items-center justify-center shrink-0">
                           <span className="text-sm font-bold leading-none">{item.day}</span>
@@ -607,24 +770,78 @@ export default function PrincipalDashboard() {
               </div>
             </div>
 
-            {/* Operations Action */}
+            {/* Quick Actions Panel (Mandate 3 - matching UI buttons layout) */}
             <section className="space-y-4">
               <h3 className="text-lg font-bold text-gray-800">Quick Actions</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <button className="p-5 rounded-2xl font-bold text-sm shadow-sm transition active:scale-95 text-center bg-[#005fb0] text-white hover:bg-blue-700">➕ Add Student</button>
-                <button className="p-5 rounded-2xl font-bold text-sm shadow-sm transition active:scale-95 text-center bg-blue-50 text-[#005fb0] border border-blue-100 hover:bg-blue-100/60">💼 Add Teacher</button>
-                <button className="p-5 rounded-2xl font-bold text-sm shadow-sm transition active:scale-95 text-center bg-red-50 text-red-700 border border-red-100 hover:bg-red-100/60">📢 Send Alert</button>
-                <button className="p-5 rounded-2xl font-bold text-sm shadow-sm transition active:scale-95 text-center bg-gray-800 text-white hover:bg-gray-900">📊 Daily Report</button>
+                <button 
+                  onClick={() => setShowAddStudentModal(true)}
+                  className="p-5 rounded-2xl font-bold text-sm shadow-sm transition active:scale-95 text-center bg-[#005fb0] text-white hover:bg-blue-700"
+                >
+                  ➕ Add Student
+                </button>
+                <button 
+                  onClick={() => setShowAddTeacherModal(true)}
+                  className="p-5 rounded-2xl font-bold text-sm shadow-sm transition active:scale-95 text-center bg-blue-50 text-[#005fb0] border border-blue-100 hover:bg-blue-100/60"
+                >
+                  💼 Add Teacher
+                </button>
+                <button 
+                  onClick={() => setShowSendAlertModal(true)}
+                  className="p-5 rounded-2xl font-bold text-sm shadow-sm transition active:scale-95 text-center bg-red-50 text-red-700 border border-red-100 hover:bg-red-100/60"
+                >
+                  📢 Send Alert
+                </button>
+                <button 
+                  onClick={triggerDailyReportAuditor}
+                  className="p-5 rounded-2xl font-bold text-sm shadow-sm transition active:scale-95 text-center bg-gray-800 text-white hover:bg-gray-900"
+                >
+                  📊 Daily Report
+                </button>
               </div>
             </section>
           </>
         )}
 
-        {/* --- CLASS MANAGEMENT MODULE (Mandate) --- */}
+        {/* VIEW 2: CLASSES (With unassigned pipeline alerts) */}
         {viewMode === 'CLASSES' && (
           <div className="space-y-6">
             
-            {/* TIER 1: Master Classroom Matrix (Landing Grid View) */}
+            {/* MANDATE 2: UNASSIGNED STUDENT PIPELINE ALERT FRAME */}
+            {unassignedStudents.length > 0 && classTier === 'GRID' && (
+              <div className="p-5 bg-amber-50 border border-amber-200 rounded-2xl shadow-sm space-y-4 animate-slideIn">
+                <div className="flex items-center gap-2 text-amber-800 font-bold text-xs">
+                  <span>⚠️</span>
+                  <span>Administrative Attention: Enrolled Student Missing Classroom Allocation</span>
+                </div>
+                
+                <div className="divide-y divide-amber-100">
+                  {unassignedStudents.map(student => (
+                    <div key={student.roll} className="py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs">
+                      <div>
+                        <p className="font-bold text-gray-800">{student.name}</p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">Mobile: {student.mobile} • Dues Paid: ${student.amountPaid}</p>
+                      </div>
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <span className="text-gray-500 font-medium">Assign To:</span>
+                        <select 
+                          onChange={(e) => handleAssignPipelineStudent(student.roll, e.target.value)}
+                          defaultValue=""
+                          className="bg-white border border-amber-300 rounded-lg text-xs font-semibold px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                        >
+                          <option value="" disabled>Select Classroom...</option>
+                          {classesList.map(c => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TIER 1: Master Classroom Matrix */}
             {classTier === 'GRID' && (
               <div className="space-y-6 animate-fadeIn">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -660,13 +877,11 @@ export default function PrincipalDashboard() {
                               {grade.name}
                             </h4>
                             {grade.substituteActive && (
-                              <span className="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-200">
-                                SUB COVERAGE
-                              </span>
+                              <span className="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-200">SUB COVERAGE</span>
                             )}
                           </div>
                           
-                          {/* Inline Teacher Picker Dropdown */}
+                          {/* Lead TeacherDropdown */}
                           <div className="mt-3">
                             <label className="block text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Class Teacher</label>
                             <select 
@@ -700,11 +915,11 @@ export default function PrincipalDashboard() {
               </div>
             )}
 
-            {/* TIER 2: Deep-Dive Classroom Command Center */}
+            {/* TIER 2: Classroom Command Center */}
             {classTier === 'COMMAND' && (
               <div className="space-y-6 animate-fadeIn">
                 
-                {/* Header Navigation & Breadcrumb */}
+                {/* Header Back button */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <button 
                     onClick={() => setClassTier('GRID')}
@@ -713,7 +928,6 @@ export default function PrincipalDashboard() {
                     ← Back to Master Matrix
                   </button>
 
-                  {/* Substitute Emergency coverage widget */}
                   <div className="flex items-center gap-2 bg-white px-4 py-2 border border-gray-100 rounded-xl shadow-sm">
                     <span className="text-xs font-bold text-gray-500">Emergency Substitute Coverage:</span>
                     <button 
@@ -729,7 +943,7 @@ export default function PrincipalDashboard() {
                   </div>
                 </div>
 
-                {/* Sub-Header Room Details Banner */}
+                {/* Sub-Header Banner */}
                 <div className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
                     <h3 className="text-xl font-bold text-gray-800">{currentClassObj.name}</h3>
@@ -750,7 +964,7 @@ export default function PrincipalDashboard() {
                   </div>
                 </div>
 
-                {/* Sub-View Tabs Selector */}
+                {/* Command tabs */}
                 <div className="flex border-b border-gray-100 gap-6">
                   {renderTabSelector("ROSTER", "👦 Student Roster", commandTab, setCommandTab)}
                   {renderTabSelector("TIMETABLE", "📅 Weekly Timetable", commandTab, setCommandTab)}
@@ -758,13 +972,12 @@ export default function PrincipalDashboard() {
                   {renderTabSelector("PROGRESS", "📊 Progress Reports", commandTab, setCommandTab)}
                 </div>
 
-                {/* --- TABBED SUB-VIEW CONTENT --- */}
+                {/* --- TAB CONTENT --- */}
                 
-                {/* SUB-VIEW A: Roster & Student Operations */}
+                {/* SUB-VIEW A: Roster */}
                 {commandTab === 'ROSTER' && (
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     
-                    {/* Students Spreadsheet */}
                     <div className="lg:col-span-8 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs border-collapse">
@@ -803,7 +1016,7 @@ export default function PrincipalDashboard() {
                       </div>
                     </div>
 
-                    {/* Inline Add Student Wizard block */}
+                    {/* Add Student block */}
                     <div className="lg:col-span-4 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
                       <div>
                         <h4 className="text-sm font-bold text-gray-800">Enroll Student</h4>
@@ -832,10 +1045,7 @@ export default function PrincipalDashboard() {
                             required
                           />
                         </div>
-                        <button 
-                          type="submit"
-                          className="w-full py-2.5 bg-[#005fb0] text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition active:scale-95"
-                        >
+                        <button type="submit" className="w-full py-2.5 bg-[#005fb0] text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition active:scale-95">
                           Submit Enrollment
                         </button>
                       </form>
@@ -844,7 +1054,7 @@ export default function PrincipalDashboard() {
                   </div>
                 )}
 
-                {/* SUB-VIEW B: Interactive Timetable Matrix */}
+                {/* SUB-VIEW B: Timetable */}
                 {commandTab === 'TIMETABLE' && (
                   <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
                     <div>
@@ -860,7 +1070,6 @@ export default function PrincipalDashboard() {
 
                     <div className="overflow-x-auto">
                       <div className="min-w-[800px] border border-gray-100 rounded-xl divide-y divide-gray-100">
-                        {/* Table Header Days */}
                         <div className="grid grid-cols-6 bg-gray-50/50 p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
                           <div>Day</div>
                           <div>Period 1<br/><span className="text-[9px] font-normal capitalize">09:00 - 10:00</span></div>
@@ -870,7 +1079,6 @@ export default function PrincipalDashboard() {
                           <div className="text-right">Actions</div>
                         </div>
 
-                        {/* Schedule Rows */}
                         {Object.keys(currentClassObj.timetable).map(day => (
                           <div key={day} className="grid grid-cols-6 items-center p-4 text-xs">
                             <div className="font-bold text-gray-700">{day}</div>
@@ -917,11 +1125,10 @@ export default function PrincipalDashboard() {
                   </div>
                 )}
 
-                {/* SUB-VIEW C: Daily Attendance Ledger Archive */}
+                {/* SUB-VIEW C: Attendance */}
                 {commandTab === 'ATTENDANCE' && (
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     
-                    {/* Daily Checklist Tracker */}
                     <div className="lg:col-span-8 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                       <div className="p-4 border-b border-gray-50">
                         <h4 className="text-sm font-bold text-gray-800">Daily Attendance Registry</h4>
@@ -967,7 +1174,6 @@ export default function PrincipalDashboard() {
                       </div>
                     </div>
 
-                    {/* Attendance Archive History */}
                     <div className="lg:col-span-4 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
                       <div>
                         <h4 className="text-sm font-bold text-gray-800">Historical Archives</h4>
@@ -989,7 +1195,7 @@ export default function PrincipalDashboard() {
                   </div>
                 )}
 
-                {/* SUB-VIEW D: Progress & Academic Performance Summary */}
+                {/* SUB-VIEW D: Academics & Report cards */}
                 {commandTab === 'PROGRESS' && (
                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div className="p-4 border-b border-gray-50">
@@ -1012,9 +1218,7 @@ export default function PrincipalDashboard() {
                               <td className="py-4 px-6 font-bold text-gray-700">{s.name}</td>
                               <td className="py-4 px-6 text-gray-400">{s.roll}</td>
                               <td className="py-4 px-6">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-[#005fb0] font-bold text-[10px] border border-blue-100">
-                                  Grade: A
-                                </span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-[#005fb0] font-bold text-[10px] border border-blue-100">Grade: A</span>
                               </td>
                               <td className="py-4 px-6 text-right">
                                 <button 
@@ -1038,11 +1242,10 @@ export default function PrincipalDashboard() {
           </div>
         )}
 
-        {/* --- TIERED FINANCE VIEW --- */}
+        {/* VIEW 3: FINANCE */}
         {viewMode === 'FINANCE' && (
           <div className="space-y-6">
             
-            {/* Breadcrumb Navigation Hook */}
             {financeTier !== 'HOME' && (
               <button 
                 onClick={() => {
@@ -1055,18 +1258,15 @@ export default function PrincipalDashboard() {
               </button>
             )}
 
-            {/* --- TIER 1: FINANCIAL HOME CORE OVERVIEW --- */}
+            {/* FINANCE TIER 1 */}
             {financeTier === 'HOME' && (
               <div className="space-y-8 animate-fadeIn">
-                
-                {/* Statistics Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {renderFinancialStatCard("💰 Total Tuition Collected", `$${totalTuitionCollected.toLocaleString()}`, "bg-green-50 border-green-100 text-green-700")}
                   {renderFinancialStatCard("⚠️ Outstanding Balance Arrears", `$${outstandingBalanceArrears.toLocaleString()}`, "bg-red-50 border-red-100 text-red-700")}
                   {renderFinancialStatCard("🚌 Overall Transport Collection", `$${totalTransportCollected.toLocaleString()}`, "bg-blue-50 border-blue-100 text-blue-700")}
                 </div>
 
-                {/* Graphical Routing Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div 
                     onClick={() => { setFinanceType('TUITION'); setFinanceTier('CLASSES'); }}
@@ -1075,11 +1275,9 @@ export default function PrincipalDashboard() {
                     <div>
                       <div className="w-12 h-12 bg-blue-50 text-[#005fb0] rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-105 transition">📊</div>
                       <h3 className="text-xl font-bold text-gray-800">Tuition Fees by Class</h3>
-                      <p className="text-xs text-gray-400 mt-1 max-w-sm">Review class-wise Tuition receipts progress, pay status rosters, and perform fee collection.</p>
+                      <p className="text-xs text-gray-400 mt-1 max-w-sm font-medium">Review class-wise Tuition receipts progress, pay status rosters, and perform fee collection.</p>
                     </div>
-                    <span className="text-xs text-[#005fb0] font-bold group-hover:translate-x-1.5 transition inline-flex items-center gap-1 mt-4">
-                      Open Tuition Ledger →
-                    </span>
+                    <span className="text-xs text-[#005fb0] font-bold group-hover:translate-x-1.5 transition inline-flex items-center gap-1 mt-4">Open Tuition Ledger →</span>
                   </div>
 
                   <div 
@@ -1089,18 +1287,13 @@ export default function PrincipalDashboard() {
                     <div>
                       <div className="w-12 h-12 bg-yellow-50 text-[#735c00] rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-105 transition">🚌</div>
                       <h3 className="text-xl font-bold text-gray-800">Transport Fee Ledger</h3>
-                      <p className="text-xs text-gray-400 mt-1 max-w-sm">Manage student transport ledger lists, identify active bus route subscribers, and record vehicle dues.</p>
+                      <p className="text-xs text-gray-400 mt-1 max-w-sm font-medium">Manage student transport ledger lists, identify active bus route subscribers, and record vehicle dues.</p>
                     </div>
-                    <span className="text-xs text-[#005fb0] font-bold group-hover:translate-x-1.5 transition inline-flex items-center gap-1 mt-4">
-                      Open Transport Ledger →
-                    </span>
+                    <span className="text-xs text-[#005fb0] font-bold group-hover:translate-x-1.5 transition inline-flex items-center gap-1 mt-4">Open Transport Ledger →</span>
                   </div>
                 </div>
 
-                {/* smart payment breakdown & reminders row */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-                  
-                  {/* Payment Method Breakdown Mini-Widget */}
                   <div className="lg:col-span-6 rounded-2xl p-6 bg-white border border-gray-100 shadow-sm space-y-4">
                     <div>
                       <h4 className="text-sm font-bold text-gray-800">Payment Method Breakdown</h4>
@@ -1113,90 +1306,42 @@ export default function PrincipalDashboard() {
                     </div>
                   </div>
 
-                  {/* Smart Broadcast Reminders block */}
                   <div className="lg:col-span-6 rounded-2xl p-6 bg-white border border-gray-100 shadow-sm flex flex-col justify-between gap-4">
                     <div>
                       <h4 className="text-sm font-bold text-gray-800">Dues Broadcast Controller</h4>
                       <p className="text-[11px] text-gray-400 mt-0.5">Issue reminders to parents with outstanding accounts</p>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                      <button 
-                        onClick={() => { setBroadcastType('TUITION'); setShowBroadcastModal(true); }}
-                        className="py-4 px-4 bg-gradient-to-b from-[#4f9dff] to-[#005fb0] text-white hover:shadow-md rounded-xl font-bold text-xs transition active:scale-95 flex items-center justify-center gap-2"
-                      >
-                        <span>📢</span> Broadcast Tuition
-                      </button>
-                      <button 
-                        onClick={() => { setBroadcastType('TRANSPORT'); setShowBroadcastModal(true); }}
-                        className="py-4 px-4 bg-gradient-to-b from-yellow-400 to-[#735c00] text-white hover:shadow-md rounded-xl font-bold text-xs transition active:scale-95 flex items-center justify-center gap-2"
-                      >
-                        <span>🚌</span> Broadcast Transport
-                      </button>
+                      <button onClick={() => { setBroadcastType('TUITION'); setShowBroadcastModal(true); }} className="py-4 px-4 bg-gradient-to-b from-[#4f9dff] to-[#005fb0] text-white hover:shadow-md rounded-xl font-bold text-xs transition active:scale-95 flex items-center justify-center gap-2"><span>📢</span> Broadcast Tuition</button>
+                      <button onClick={() => { setBroadcastType('TRANSPORT'); setShowBroadcastModal(true); }} className="py-4 px-4 bg-gradient-to-b from-yellow-400 to-[#735c00] text-white hover:shadow-md rounded-xl font-bold text-xs transition active:scale-95 flex items-center justify-center gap-2"><span>🚌</span> Broadcast Transport</button>
                     </div>
                   </div>
-
                 </div>
-
               </div>
             )}
 
-            {/* --- TIER 2: CLASS-WISE GRID SELECTORS --- */}
+            {/* FINANCE TIER 2 */}
             {financeTier === 'CLASSES' && (
               <div className="space-y-6 animate-fadeIn">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-800">
-                      {financeType === 'TUITION' ? 'Tuition Roster: Class Selector' : 'Transport Roster: Class Selector'}
-                    </h3>
-                    <p className="text-xs text-gray-400 mt-0.5">Select a grade block to view individual registers.</p>
-                  </div>
-                </div>
-
+                <h3 className="text-xl font-bold text-gray-800">{financeType === 'TUITION' ? 'Tuition Roster: Class Selector' : 'Transport Roster: Class Selector'}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {classesList.map(grade => {
                     const classStudents = studentsList.filter(s => s.class === grade.name);
-                    const totalCount = financeType === 'TUITION' 
-                      ? classStudents.length 
-                      : classStudents.filter(s => s.usesTransport).length;
-
-                    const paidCount = financeType === 'TUITION'
-                      ? classStudents.filter(s => s.tuitionStatus === 'Paid').length
-                      : classStudents.filter(s => s.usesTransport && s.transportStatus === 'Paid').length;
+                    const totalCount = financeType === 'TUITION' ? classStudents.length : classStudents.filter(s => s.usesTransport).length;
+                    const paidCount = financeType === 'TUITION' ? classStudents.filter(s => s.tuitionStatus === 'Paid').length : classStudents.filter(s => s.usesTransport && s.transportStatus === 'Paid').length;
 
                     return (
-                      <div 
-                        key={grade.id}
-                        className="rounded-2xl p-6 bg-white border border-gray-100 shadow-sm hover:border-[#005fb0]/20 hover:shadow-md transition flex flex-col justify-between h-56"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-bold text-gray-800 text-lg">{grade.name}</h4>
-                            <p className="text-xs text-gray-400 mt-1">
-                              {financeType === 'TUITION' ? 'General Admission' : 'Bus Route Rider Roster'}
-                            </p>
-                          </div>
-                        </div>
-
+                      <div key={grade.id} className="rounded-2xl p-6 bg-white border border-gray-100 shadow-sm hover:border-[#005fb0]/20 hover:shadow-md transition flex flex-col justify-between h-56">
+                        <h4 className="font-bold text-gray-800 text-lg">{grade.name}</h4>
                         <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-50">
                           <div className="flex justify-between items-center text-xs">
                             <div>
                               <span className="text-[10px] text-gray-400 block uppercase font-bold tracking-wider">Ledger Status</span>
                               <span className="font-bold text-gray-700">{paidCount}/{totalCount} Paid</span>
                             </div>
-                            <button 
-                              onClick={() => { setSelectedFinanceClass(grade.name); setFinanceTier('ROSTER'); setFinanceSearchQuery(''); }}
-                              className="px-3.5 py-1.5 bg-blue-50 text-[#005fb0] font-bold rounded-lg hover:bg-blue-100 transition active:scale-95 text-[11px]"
-                            >
-                              Open List
-                            </button>
+                            <button onClick={() => { setSelectedFinanceClass(grade.name); setFinanceTier('ROSTER'); setFinanceSearchQuery(''); }} className="px-3.5 py-1.5 bg-blue-50 text-[#005fb0] font-bold rounded-lg hover:bg-blue-100 transition text-[11px]">Open List</button>
                           </div>
-
-                          <button 
-                            onClick={() => handleClassLevelBroadcast(grade.name)}
-                            className="w-full py-2 bg-gray-50 border border-gray-100 hover:bg-gray-100 rounded-xl text-[10px] font-bold text-gray-500 uppercase tracking-wider transition active:scale-[0.97]"
-                          >
-                            📢 Remind Pending Parents
-                          </button>
+                          <button onClick={() => handleClassLevelBroadcast(grade.name)} className="w-full py-2 bg-gray-50 border border-gray-100 hover:bg-gray-100 rounded-xl text-[10px] font-bold text-gray-500 uppercase tracking-wider transition active:scale-[0.97]">📢 Remind Pending Parents</button>
                         </div>
                       </div>
                     );
@@ -1205,36 +1350,25 @@ export default function PrincipalDashboard() {
               </div>
             )}
 
-            {/* --- TIER 3 & 4: STUDENT ROSTER LEDGER TABLE --- */}
+            {/* FINANCE TIER 3 */}
             {financeTier === 'ROSTER' && (
               <div className="space-y-6 animate-fadeIn">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
-                    <span className="text-xs font-bold text-[#005fb0] uppercase tracking-wider">
-                      {financeType === 'TUITION' ? 'Tuition Ledger' : 'Transport Dues Ledger'}
-                    </span>
+                    <span className="text-xs font-bold text-[#005fb0] uppercase tracking-wider">{financeType === 'TUITION' ? 'Tuition Ledger' : 'Transport Dues Ledger'}</span>
                     <h3 className="text-xl font-bold text-gray-800">{selectedFinanceClass} Roster</h3>
                   </div>
-
-                  {/* Filter Search Input */}
                   <div className="relative w-full md:w-64">
                     <span className="absolute left-3 top-2.5 text-gray-400 text-xs">🔍</span>
-                    <input 
-                      type="text"
-                      placeholder="Search student..."
-                      value={financeSearchQuery}
-                      onChange={(e) => setFinanceSearchQuery(e.target.value)}
-                      className="w-full pl-8 pr-4 py-1.5 rounded-full bg-white border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400/20"
-                    />
+                    <input type="text" placeholder="Search student..." value={financeSearchQuery} onChange={(e) => setFinanceSearchQuery(e.target.value)} className="w-full pl-8 pr-4 py-1.5 rounded-full bg-white border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400/20" />
                   </div>
                 </div>
 
-                {/* Roster Table */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-gray-50 text-gray-400 uppercase font-bold tracking-wider border-b border-gray-100">
+                        <tr className="bg-gray-50 text-gray-400 uppercase font-bold border-b border-gray-100">
                           <th className="py-4 px-6">Student Name</th>
                           <th className="py-4 px-6">Roll Number</th>
                           <th className="py-4 px-6">Dues Amount</th>
@@ -1244,72 +1378,31 @@ export default function PrincipalDashboard() {
                       </thead>
                       <tbody className="divide-y divide-gray-50">
                         {(() => {
-                          const filtered = studentsList.filter(student => {
-                            if (student.class !== selectedFinanceClass) return false;
-                            if (financeType === 'TRANSPORT' && !student.usesTransport) return false;
-                            return student.name.toLowerCase().includes(financeSearchQuery.toLowerCase());
+                          const filtered = studentsList.filter(s => {
+                            if (s.class !== selectedFinanceClass) return false;
+                            if (financeType === 'TRANSPORT' && !s.usesTransport) return false;
+                            return s.name.toLowerCase().includes(financeSearchQuery.toLowerCase());
                           });
-
-                          if (filtered.length === 0) {
-                            return (
-                              <tr>
-                                <td colSpan="5" className="py-8 text-center text-gray-400 italic">No student records match filters.</td>
-                              </tr>
-                            );
-                          }
-
+                          if (filtered.length === 0) return <tr><td colSpan="5" className="py-8 text-center text-gray-400 italic">No student records match filters.</td></tr>;
                           return filtered.map(student => {
                             const due = financeType === 'TUITION' ? student.tuitionDue : student.transportDue;
                             const status = financeType === 'TUITION' ? student.tuitionStatus : student.transportStatus;
                             const reason = financeType === 'TUITION' ? student.tuitionWaiveReason : student.transportWaiveReason;
-
                             return (
                               <tr key={student.roll} className="hover:bg-gray-50/50 transition">
-                                <td className="py-4 px-6 font-bold text-gray-700">
-                                  {student.name}
-                                  {status === 'Waived' && (
-                                    <span className="block text-[9px] text-amber-600 font-medium normal-case mt-0.5">Reason: {reason}</span>
-                                  )}
-                                </td>
+                                <td className="py-4 px-6 font-bold text-gray-700">{student.name} {status === 'Waived' && <span className="block text-[9px] text-amber-600 font-medium normal-case mt-0.5">Reason: {reason}</span>}</td>
                                 <td className="py-4 px-6 text-gray-400">{student.roll}</td>
                                 <td className="py-4 px-6 font-semibold">${due}</td>
-                                <td className="py-4 px-6">
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                    status === 'Paid' 
-                                      ? 'bg-green-50 text-green-700 border border-green-100' 
-                                      : status === 'Waived'
-                                      ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                                      : 'bg-red-50 text-red-700 border border-red-100'
-                                  }`}>
-                                    {status === 'Paid' ? '✓ Paid' : status === 'Waived' ? '⚖ Waived' : '● Pending'}
-                                  </span>
-                                </td>
+                                <td className="py-4 px-6"><span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${status === 'Paid' ? 'bg-green-50 text-green-700 border border-green-100' : status === 'Waived' ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>{status === 'Paid' ? '✓ Paid' : status === 'Waived' ? '⚖ Waived' : '● Pending'}</span></td>
                                 <td className="py-4 px-6 text-right">
                                   <div className="flex gap-2 justify-end items-center">
                                     {status === 'Pending' ? (
                                       <>
-                                        <button 
-                                          onClick={() => handleCollectFees(student.roll, financeType)}
-                                          className="px-3 py-1.5 bg-[#005fb0] text-white rounded-lg font-bold hover:bg-blue-700 transition active:scale-95 text-[11px]"
-                                        >
-                                          Collect Fees
-                                        </button>
-                                        <button 
-                                          onClick={() => handleOpenWaiveModal(student.roll)}
-                                          className="px-3 py-1.5 border border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100/50 rounded-lg font-bold transition active:scale-95 text-[11px]"
-                                        >
-                                          Waive Dues
-                                        </button>
-                                        <button 
-                                          onClick={() => handleTargetedAlert(student.name)}
-                                          className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 hover:text-[#005fb0] hover:bg-blue-50 transition flex items-center justify-center font-bold text-xs"
-                                        >
-                                          ✉️
-                                        </button>
+                                        <button onClick={() => handleCollectFees(student.roll, financeType)} className="px-3 py-1.5 bg-[#005fb0] text-white rounded-lg font-bold hover:bg-blue-700 text-[11px]">Collect</button>
+                                        <button onClick={() => handleOpenWaiveModal(student.roll)} className="px-3 py-1.5 border border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100/50 rounded-lg font-bold text-[11px]">Waive</button>
+                                        <button onClick={() => handleTargetedAlert(student.name)} className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 hover:text-[#005fb0] flex items-center justify-center font-bold text-xs">✉️</button>
                                       </>
-                                    ) : (
-                                      <span className="text-gray-400 text-xs font-semibold italic">Processed</span>
-                                    )}
+                                    ) : <span className="text-gray-400 text-xs font-semibold italic">Processed</span>}
                                   </div>
                                 </td>
                               </tr>
@@ -1322,11 +1415,307 @@ export default function PrincipalDashboard() {
                 </div>
               </div>
             )}
-
           </div>
         )}
 
       </main>
+
+      {/* --- +ADD STUDENT ENROLLMENT MODAL (Mandate 1) --- */}
+      {showAddStudentModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xl max-w-2xl w-full my-8 animate-modalScale">
+            <header className="flex justify-between items-center border-b border-gray-50 pb-3 mb-4">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-1">
+                <span>➕</span> Admission Enrollment Intake Form
+              </h3>
+              <button onClick={() => setShowAddStudentModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">×</button>
+            </header>
+
+            <form onSubmit={handleAdmissionSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto pr-2 text-xs">
+              
+              {/* Category 1: Student Information */}
+              <fieldset className="border border-gray-100 rounded-2xl p-4 bg-gray-50/50 space-y-3">
+                <legend className="px-2 font-bold text-[#005fb0] uppercase tracking-wider text-[10px]">Student Info</legend>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Full Name</label>
+                    <input type="text" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.fullName} onChange={(e) => setAdmissionForm({...admissionForm, fullName: e.target.value})} required />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Date of Birth</label>
+                    <input type="date" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.dob} onChange={(e) => setAdmissionForm({...admissionForm, dob: e.target.value})} required />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Gender</label>
+                    <select className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.gender} onChange={(e) => setAdmissionForm({...admissionForm, gender: e.target.value})}>
+                      <option>Male</option>
+                      <option>Female</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Blood Group</label>
+                    <input type="text" placeholder="e.g. O+" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.bloodGroup} onChange={(e) => setAdmissionForm({...admissionForm, bloodGroup: e.target.value})} required />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Allergies</label>
+                    <input type="text" placeholder="e.g. Peanuts" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.allergies} onChange={(e) => setAdmissionForm({...admissionForm, allergies: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Special Talents</label>
+                    <input type="text" placeholder="e.g. Painting, Singing" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.specialTalents} onChange={(e) => setAdmissionForm({...admissionForm, specialTalents: e.target.value})} />
+                  </div>
+                </div>
+              </fieldset>
+
+              {/* Category 2: Parent Details */}
+              <fieldset className="border border-gray-100 rounded-2xl p-4 bg-gray-50/50 space-y-3">
+                <legend className="px-2 font-bold text-[#005fb0] uppercase tracking-wider text-[10px]">Parent Details</legend>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Father's Name</label>
+                    <input type="text" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.fatherName} onChange={(e) => setAdmissionForm({...admissionForm, fatherName: e.target.value})} required />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Father's Occupation</label>
+                    <input type="text" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.fatherOcc} onChange={(e) => setAdmissionForm({...admissionForm, fatherOcc: e.target.value})} required />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Mother's Name</label>
+                    <input type="text" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.motherName} onChange={(e) => setAdmissionForm({...admissionForm, motherName: e.target.value})} required />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Mother's Occupation</label>
+                    <input type="text" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.motherOcc} onChange={(e) => setAdmissionForm({...admissionForm, motherOcc: e.target.value})} required />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Email Address</label>
+                    <input type="email" placeholder="name@domain.com" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.email} onChange={(e) => setAdmissionForm({...admissionForm, email: e.target.value})} required />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Primary Mobile Number</label>
+                    <input type="tel" placeholder="+91 98765..." className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.mobile} onChange={(e) => setAdmissionForm({...admissionForm, mobile: e.target.value})} required />
+                  </div>
+                </div>
+              </fieldset>
+
+              {/* Category 3: Logistics & Intake */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <fieldset className="border border-gray-100 rounded-2xl p-4 bg-gray-50/50 space-y-3">
+                  <legend className="px-2 font-bold text-[#005fb0] uppercase tracking-wider text-[10px]">Logistics</legend>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Languages Spoken</label>
+                    <input type="text" placeholder="e.g. English, Hindi" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.languagesSpoken} onChange={(e) => setAdmissionForm({...admissionForm, languagesSpoken: e.target.value})} required />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 mb-1">Food Type</label>
+                      <select className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.foodType} onChange={(e) => setAdmissionForm({...admissionForm, foodType: e.target.value})}>
+                        <option>Vegetarian</option>
+                        <option>Non-vegetarian</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 mb-1">Transport Route</label>
+                      <select className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.transportPref} onChange={(e) => setAdmissionForm({...admissionForm, transportPref: e.target.value})}>
+                        <option>School Van</option>
+                        <option>Own</option>
+                      </select>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <fieldset className="border border-gray-100 rounded-2xl p-4 bg-gray-50/50 space-y-3">
+                  <legend className="px-2 font-bold text-[#005fb0] uppercase tracking-wider text-[10px]">Office Intake</legend>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">Mode of Payment</label>
+                    <select className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.payMode} onChange={(e) => setAdmissionForm({...admissionForm, payMode: e.target.value})}>
+                      <option>Cash</option>
+                      <option>DD</option>
+                      <option>Cheque</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 mb-1">Amount Paid ($)</label>
+                      <input type="number" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.amountPaid} onChange={(e) => setAdmissionForm({...admissionForm, amountPaid: e.target.value})} required />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 mb-1">Receipt Number</label>
+                      <input type="text" placeholder="e.g. REC-9921" className="w-full p-2 bg-white border border-gray-200 rounded-lg focus:outline-none" value={admissionForm.receiptNum} onChange={(e) => setAdmissionForm({...admissionForm, receiptNum: e.target.value})} required />
+                    </div>
+                  </div>
+                </fieldset>
+
+              </div>
+
+              <div className="flex gap-3 justify-end pt-3 border-t border-gray-50">
+                <button type="button" onClick={() => setShowAddStudentModal(false)} className="px-6 py-2.5 border border-gray-200 text-gray-500 font-bold rounded-full hover:bg-gray-50 transition">Cancel</button>
+                <button type="submit" className="px-6 py-2.5 bg-[#005fb0] text-white font-bold rounded-full hover:bg-blue-700 transition">Submit Admission</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- +ADD TEACHER MODAL (Mandate 3) --- */}
+      {showAddTeacherModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xl max-w-md w-full animate-modalScale">
+            <header className="flex justify-between items-center border-b border-gray-50 pb-3 mb-4">
+              <h3 className="text-lg font-bold text-gray-800">Add New Teacher</h3>
+              <button onClick={() => setShowAddTeacherModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">×</button>
+            </header>
+            <form onSubmit={handleAddTeacherSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Full Name</label>
+                <input 
+                  type="text"
+                  placeholder="e.g. Ms. Emma Watson"
+                  value={newTeacherName}
+                  onChange={(e) => setNewTeacherName(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Phone Number</label>
+                <input 
+                  type="tel"
+                  placeholder="+91 98765..."
+                  value={newTeacherPhone}
+                  onChange={(e) => setNewTeacherPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Area of Specialization</label>
+                <input 
+                  type="text"
+                  placeholder="e.g. Pre-School Arts"
+                  value={newTeacherSpec}
+                  onChange={(e) => setNewTeacherSpec(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:outline-none"
+                />
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <button type="button" onClick={() => setShowAddTeacherModal(false)} className="px-4 py-2 border border-gray-200 text-gray-500 font-bold rounded-full hover:bg-gray-50 transition">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-[#005fb0] text-white font-bold rounded-full hover:bg-blue-700 transition">Save Faculty</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- EMERGENCY ALERT BROADCASTER MODAL (Mandate 3) --- */}
+      {showSendAlertModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xl max-w-md w-full animate-modalScale">
+            <header className="flex justify-between items-center border-b border-gray-50 pb-3 mb-4">
+              <h3 className="text-lg font-bold text-red-600 flex items-center gap-1.5">
+                <span>📢</span> Send Emergency Broadcast
+              </h3>
+              <button onClick={() => setShowSendAlertModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">×</button>
+            </header>
+            <form onSubmit={handleSendAlertSubmit} className="space-y-4 text-xs">
+              <div className="p-3 bg-red-50 text-red-700 rounded-xl font-semibold border border-red-100 leading-normal">
+                ⚠️ WARNING: Sending this broadcast inserts an immediate "EMERGENCY URGENT" alert badge notice onto the main Operations Announcements board feed.
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Message Content</label>
+                <textarea 
+                  rows="4"
+                  placeholder="Enter details of alert (e.g. Extreme weather school closure tomorrow)..."
+                  value={alertMessageContent}
+                  onChange={(e) => setAlertMessageContent(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400/20"
+                  required
+                />
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <button type="button" onClick={() => setShowSendAlertModal(false)} className="px-4 py-2 border border-gray-200 text-gray-500 font-bold rounded-full hover:bg-gray-50 transition">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition">Broadcast Alert</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- DAILY REPORT AUDIT SUMMARY MODAL (Mandate 3) --- */}
+      {showDailyReportModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xl max-w-lg w-full animate-modalScale">
+            <header className="flex justify-between items-center border-b border-gray-50 pb-3 mb-4">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-1">
+                <span>📊</span> Daily Executive Audit Report
+              </h3>
+              <button onClick={() => setShowDailyReportModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">×</button>
+            </header>
+
+            <div className="space-y-4 text-xs">
+              <p className="text-gray-500 leading-relaxed">
+                The school auditor engine has scanned all classroom ledger systems for **Monday, October 23, 2023** and generated this audit compliance summary.
+              </p>
+
+              {/* Roster & Attendance Checks */}
+              <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-2">
+                <h4 className="font-bold text-gray-700 uppercase tracking-wider text-[9px]">Attendance Statistics</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-gray-400 block">Student Live Count</span>
+                    <span className="font-bold text-gray-700 text-sm">116/124 Present (94%)</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 block">Lead Instructors Shift</span>
+                    <span className="font-bold text-gray-700 text-sm">16/18 On-duty (2 Leave)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Finance Audit check */}
+              <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-2">
+                <h4 className="font-bold text-gray-700 uppercase tracking-wider text-[9px]">Cash Box Ledger Checks</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <span className="text-gray-400 block">Tuition Collected</span>
+                    <span className="font-bold text-green-600 text-sm">${totalTuitionCollected.toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 block">Transport Collections</span>
+                    <span className="font-bold text-blue-600 text-sm">${totalTransportCollected.toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 block">Total Arrears Outstanding</span>
+                    <span className="font-bold text-red-500 text-sm">${outstandingBalanceArrears.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-blue-50 text-[#005fb0] rounded-xl font-semibold border border-blue-100">
+                ✓ Auditor Verdict: System files are clean. Ready for administrative authentication.
+              </div>
+
+              <div className="flex gap-2 justify-end pt-3 border-t border-gray-50">
+                <button type="button" onClick={() => setShowDailyReportModal(false)} className="px-5 py-2.5 border border-gray-200 text-gray-500 font-bold rounded-full hover:bg-gray-50 transition">Cancel</button>
+                <button 
+                  type="button" 
+                  onClick={() => { setShowDailyReportModal(false); setToastMessage("Daily Executive Audit signed off successfully."); }} 
+                  className="px-5 py-2.5 bg-gray-800 text-white font-bold rounded-full hover:bg-gray-900 transition"
+                >
+                  ✓ Sign-off Report
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* --- ADD NEW CLASS MODAL (Classes) --- */}
       {showAddClassModal && (
@@ -1395,140 +1784,17 @@ export default function PrincipalDashboard() {
                 <span className="font-bold text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full border border-green-100 text-[10px] uppercase">{selectedStudentGrades.Behavior}</span>
               </div>
             </div>
-            <button 
-              onClick={() => setShowProgressCardModal(false)}
-              className="w-full mt-4 py-2.5 bg-gray-800 text-white font-bold text-xs rounded-xl hover:bg-gray-900 transition"
-            >
-              Close Ledger Card
-            </button>
+            <button onClick={() => setShowProgressCardModal(false)} className="w-full mt-4 py-2.5 bg-gray-800 text-white font-bold text-xs rounded-xl hover:bg-gray-900 transition">Close Ledger Card</button>
           </div>
         </div>
       )}
 
-      {/* --- ANNOUNCEMENTS WIZARD MODAL --- */}
-      {showAnnounceModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xl max-w-md w-full animate-modalScale">
-            <header className="flex justify-between items-center border-b border-gray-50 pb-3 mb-4">
-              <h3 className="text-lg font-bold text-gray-800">Add New Announcement</h3>
-              <button onClick={() => setShowAnnounceModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">×</button>
-            </header>
-            <form onSubmit={handleAddAnnouncement} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Category Tag</label>
-                <select 
-                  value={newAnnounceCat}
-                  onChange={(e) => setNewAnnounceCat(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400/20"
-                >
-                  <option value="General">General</option>
-                  <option value="Holiday">Holiday</option>
-                  <option value="Health">Health</option>
-                  <option value="Academic">Academic</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Content Title / Text</label>
-                <textarea 
-                  rows="3"
-                  placeholder="Enter details..."
-                  value={newAnnounceText}
-                  onChange={(e) => setNewAnnounceText(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-400/20"
-                  required
-                />
-              </div>
-              <div className="flex gap-2 justify-end pt-2">
-                <button type="button" onClick={() => setShowAnnounceModal(false)} className="px-4 py-2 border border-gray-200 text-gray-500 text-xs font-bold rounded-full hover:bg-gray-50 transition">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-[#005fb0] text-white text-xs font-bold rounded-full hover:bg-blue-700 transition">Post Notice</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* --- EVENTS WIZARD MODAL --- */}
-      {showEventModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xl max-w-md w-full animate-modalScale">
-            <header className="flex justify-between items-center border-b border-gray-50 pb-3 mb-4">
-              <h3 className="text-lg font-bold text-gray-800">Schedule New Event</h3>
-              <button onClick={() => setShowEventModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">×</button>
-            </header>
-            <form onSubmit={handleAddEvent} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Event Title</label>
-                <input 
-                  type="text"
-                  placeholder="e.g. Science Fair"
-                  value={newEventTitle}
-                  onChange={(e) => setNewEventTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-400/20"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Day Date (Number)</label>
-                  <input 
-                    type="text"
-                    placeholder="e.g. 25"
-                    value={newEventDay}
-                    onChange={(e) => setNewEventDay(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-400/20"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Month String</label>
-                  <select 
-                    value={newEventMonth}
-                    onChange={(e) => setNewEventMonth(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400/20"
-                  >
-                    <option value="Jan">Jan</option>
-                    <option value="Feb">Feb</option>
-                    <option value="Mar">Mar</option>
-                    <option value="Apr">Apr</option>
-                    <option value="May">May</option>
-                    <option value="Jun">Jun</option>
-                    <option value="Jul">Jul</option>
-                    <option value="Aug">Aug</option>
-                    <option value="Sep">Sep</option>
-                    <option value="Oct">Oct</option>
-                    <option value="Nov">Nov</option>
-                    <option value="Dec">Dec</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Time Slot / Duration</label>
-                <input 
-                  type="text"
-                  placeholder="e.g. 09:00 AM - 12:00 PM"
-                  value={newEventTime}
-                  onChange={(e) => setNewEventTime(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-400/20"
-                  required
-                />
-              </div>
-              <div className="flex gap-2 justify-end pt-2">
-                <button type="button" onClick={() => setShowEventModal(false)} className="px-4 py-2 border border-gray-200 text-gray-500 text-xs font-bold rounded-full hover:bg-gray-50 transition">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-[#005fb0] text-white text-xs font-bold rounded-full hover:bg-blue-700 transition">Add Event</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* --- DUES BROADCAST CONTROLLER MODAL --- */}
+      {/* --- DUES BROADCAST CONTROLLER --- */}
       {showBroadcastModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fadeIn">
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xl max-w-md w-full animate-modalScale">
             <header className="flex justify-between items-center border-b border-gray-50 pb-3 mb-4">
-              <h3 className="text-lg font-bold text-gray-800">
-                📢 {broadcastType === 'TUITION' ? 'Tuition Arrears Reminder' : 'Transport Dues Reminder'}
-              </h3>
+              <h3 className="text-lg font-bold text-gray-800">📢 {broadcastType === 'TUITION' ? 'Tuition Arrears Reminder' : 'Transport Dues Reminder'}</h3>
               <button onClick={() => setShowBroadcastModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">×</button>
             </header>
             {broadcastLoading ? (
@@ -1568,7 +1834,7 @@ export default function PrincipalDashboard() {
         </div>
       )}
 
-      {/* --- ADMINISTRATIVE EXEMPTION OVERRIDE MODAL --- */}
+      {/* --- ADMINISTRATIVE EXEMPTION OVERRIDE --- */}
       {showWaiveModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fadeIn">
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xl max-w-md w-full animate-modalScale">
@@ -1601,7 +1867,7 @@ export default function PrincipalDashboard() {
   );
 }
 
-// --- RENDER PIECES ---
+// --- SUB-BUILDERS ---
 
 function renderStatCard(title, val, label, footer) {
   return (
