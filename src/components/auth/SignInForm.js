@@ -1,12 +1,12 @@
 // src/components/auth/SignInForm.js
-'use client'; // no-op under the pages router; required if this app uses the App Router.
+'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '../../../shared/api/supabaseClient';
 import { ChangePasswordOverlay } from '../../../components/auth/ChangePasswordOverlay';
 
 export function SignInForm() {
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [captchaToken, setCaptchaToken] = useState(null);
   const [error, setError] = useState(null);
@@ -15,7 +15,6 @@ export function SignInForm() {
   const turnstileRef = useRef(null);
   const turnstileWidgetId = useRef(null);
 
-  // --- Load + render the Turnstile widget once -------------------------
   useEffect(() => {
     const existingScript = document.querySelector(
       'script[src^="https://challenges.cloudflare.com/turnstile"]'
@@ -62,13 +61,26 @@ export function SignInForm() {
     setCaptchaToken(null);
   }, []);
 
-  // --- Submit pipeline ---------------------------------------------------
+  /**
+   * Normalizes incoming phone inputs to match standard E.164 expected format.
+   * - Strips all non-digit characters out.
+   * - Assumes a 10-digit number without an explicit country code prefix is local (+91).
+   * - Restores the leading '+' symbol to comply with strict Supabase requirements.
+   */
+  const normalizePhone = (raw) => {
+    const cleaned = raw.replace(/\D/g, ''); 
+    if (!cleaned) return '';
+    
+    const standardDigits = cleaned.length === 10 ? `91${cleaned}` : cleaned;
+    return `+${standardDigits}`;
+  };
+
   const handleSignIn = async (e) => {
     e.preventDefault();
     setError(null);
 
-    if (!email || !password) {
-      setError('Enter your email and password.');
+    if (!phone || !password) {
+      setError('Enter your phone number and password.');
       return;
     }
     if (!captchaToken) {
@@ -79,33 +91,29 @@ export function SignInForm() {
     setStage('submitting');
 
     try {
+      const normalized = normalizePhone(phone);
+      if (!normalized) {
+        throw new Error('Please enter a valid phone number.');
+      }
+
       const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        phone: normalized,
         password,
         options: {
-          captchaToken, // forwarded to Supabase's rate-limiting layer
+          captchaToken,
         },
       });
 
       if (authError) throw authError;
 
-      // Read-side note: this still reads must_change_password off
-      // user_metadata, which is separate from the write-side fix (the
-      // overlay now clears the flag via the Go backend, not user_metadata
-      // directly — see ChangePasswordOverlay.js). If the Go backend is the
-      // real source of truth for this flag, this check may eventually want
-      // to move to a Go endpoint too, for consistency with the clear path.
-      // Leaving as user_metadata per the current directive; flag if that
-      // should change.
       const mustChangePassword = data.user?.user_metadata?.must_change_password === true;
 
       if (mustChangePassword) {
-        setStage('must_change_password'); // blocks dashboard routing
+        setStage('must_change_password');
         return;
       }
 
       setStage('idle');
-      // Navigation to the dashboard is left to the parent app/router.
     } catch (err) {
       setError(err?.message || 'Authentication failed.');
       resetCaptcha();
@@ -118,8 +126,6 @@ export function SignInForm() {
       <ChangePasswordOverlay
         onComplete={() => {
           setStage('idle');
-          // TODO: hand off to the real router to proceed to the dashboard —
-          // not assumed here.
         }}
       />
     );
@@ -128,15 +134,16 @@ export function SignInForm() {
   return (
     <form onSubmit={handleSignIn} className="auth-form" noValidate>
       <div className="field">
-        <label htmlFor="email">Email</label>
+        <label htmlFor="phone">Phone number</label>
         <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="username"
+          id="phone"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          placeholder="+91XXXXXXXXXX"
           required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
         />
       </div>
 
@@ -153,7 +160,6 @@ export function SignInForm() {
         />
       </div>
 
-      {/* Cloudflare Turnstile explicit anchor */}
       <div ref={turnstileRef} className="my-4" />
 
       {error && (
