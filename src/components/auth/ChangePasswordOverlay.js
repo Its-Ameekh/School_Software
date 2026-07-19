@@ -2,9 +2,8 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '../../shared/api/supabaseClient';
 import { apiClient } from '../../shared/api/client';
-// At least 8 chars, 1 uppercase, 1 lowercase, 1 digit.
+
 const PASSWORD_POLICY = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 export function ChangePasswordOverlay({ onComplete }) {
@@ -30,18 +29,13 @@ export function ChangePasswordOverlay({ onComplete }) {
 
     setSubmitting(true);
     try {
-      // 1. Update the credential itself with Supabase.
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword,
+      // Single call — backend verifies the flag is set, validates the
+      // policy again server-side, and uses the Admin API to change the
+      // password AND clear must_change_password atomically. Frontend
+      // never touches Supabase admin operations.
+      await apiClient.post('/auth/change-temporary-password', {
+        newPassword,
       });
-      if (updateError) throw updateError;
-
-      // 2. Clear the flag server-side. Deliberately NOT writing
-      //    must_change_password back to user_metadata from the frontend —
-      //    that was the vulnerability this endpoint exists to close. The Go
-      //    backend clears it only after independently confirming the
-      //    password was actually changed.
-      await apiClient.post('/auth/clear-temporary-password');
 
       onComplete();
     } catch (err) {
